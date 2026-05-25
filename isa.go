@@ -3,7 +3,7 @@ package isa
 type ISA map[string]string
 // type Registers map[string]string /*just create a fun to dynamic find the bin instead of this*/
 
-var instructions ISA = {
+var Instructions ISA = {
 	// R format
 	"ADD": "10001011000",
 	"SUB": "11001011000",
@@ -63,6 +63,6 @@ R format
 
 /* D format, only prob is parsing the brackets */
 
-/* B has no prob afaics*/
+/* B has no prob afaics sw CB ig*/
 
-
+/* two pass assemblers so first find labels and their addresses*/
