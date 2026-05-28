@@ -5,5 +5,6 @@ import (
 )
 
 func main() {
-	fmt.Println(len(stringstrings.Split("test   ", " ")))
+	var s int = 1
+	fmt.Println("asd", s)
 }

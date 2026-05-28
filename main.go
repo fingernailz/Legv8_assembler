@@ -9,9 +9,15 @@ import (
 
 // type Registers map[string]string /*just create a fun to dynamic find the bin instead of this*/
 
-func init() {
+// const (
 
-}
+// )
+
+// func
+
+// func init() {
+
+// }
 
 func main() {
 	/*;)*/ cnt, err := os.ReadFile("test.asm")
@@ -31,6 +37,10 @@ func main() {
 			continue
 		}
 
+		if len(y) == 0 {
+			continue
+		}
+
 		// "  ADD x1, x1, x3" first remove the space from the sentance then split wrt space and trimspace for safety to get the instruction or label
 		z := strings.TrimSpace(strings.Split(strings.TrimSpace(y), " ")[0])
 
@@ -39,7 +49,9 @@ func main() {
 		_, m := isa.Instructions[z]
 
 		if m {
+			fmt.Println("1 ", m)
 			inst, _, _ := strings.Cut(y, "//")
+			fmt.Println("val:", strings.TrimSpace(inst))
 			final_cut = append(final_cut, strings.TrimSpace(inst))
 			loc += 1
 			continue
@@ -58,14 +70,17 @@ func main() {
 		}
 
 		label_locations[z] = loc
+		fmt.Println(z)
 
 		//I still have this problem "labelsomethign: instruction_next_to_it" send the instruction to the next line so that There won't be an location problems
 
 		//this could be the solutioon
-		label, instruction, found := strings.Cut(strings.TrimSpace(y), " ")
-		final_cut = append(final_cut, label)
+		// problem with y thats y new line always
+		_, instruction, found := strings.Cut(strings.TrimSpace(y), " ")
+		// final_cut = append(final_cut, label)
 		loc += 1
 		if found {
+			fmt.Println("the found ", instruction, len(instruction))
 			instruction, _, _ := strings.Cut(strings.TrimSpace(instruction), "//")
 			final_cut = append(final_cut, strings.TrimSpace(instruction))
 			loc += 1
@@ -73,11 +88,27 @@ func main() {
 
 	}
 
-	// for index, ins := range final_cut {
+	for index, ins := range final_cut {
+		if ins == "" {
+			fmt.Println("Empty")
+			continue
+		}
+		fmt.Println(index)
+		ins = strings.TrimSpace(ins)
+		instruction_slice := strings.Split(ins, " ")
+		// what am I doibg here???????????????????????????????
+		// ins := slices.DeleteFunc(instruction_slice, func(n string) bool {
+		// 	// return (instruction_slice[n] == " " || instruction_slice[n] == "\n")
+		// 	return n == "" || n == " " || n == "\n"
+		// })
+		// fmt.Println(strings.Join(ins, ""))
+	}
 
-	// }
-
-	fmt.Println(strings.Join(final_cut, "\n"))
+	fmt.Println(strings.Join(final_cut, ""))
+	fmt.Println(len(final_cut))
+	for x, y := range final_cut {
+		fmt.Println(x, y)
+	}
 	fmt.Println(label_locations)
 
 }
