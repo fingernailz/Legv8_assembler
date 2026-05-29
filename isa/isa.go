@@ -1,99 +1,213 @@
 package isa
 
-type ISA map[string]string
+type ISA map[string]map[string]string
 type Registers map[string]string
+
+const (
+	R_FORMAT  = "R-FORMAT"
+	I_FORMAT  = "I-FORMAT"
+	D_FORMAT  = "D-FORMAT"
+	B_FORMAT  = "B-FORMAT"
+	CB_FORMAT = "CB-FORMAT"
+	IW_FORMAT = "IW-FORMAT"
+)
 
 // type Registers map[string]string /*just create a fun to dynamic find the bin instead of this*/
 
 var Instructions ISA = ISA{
 	// R format
-	"ADD":  "10001011000",
-	"SUB":  "11001011000",
-	"ADDS": "10101011000",
-	"SUBS": "11101011000",
-	"AND":  "10001010000",
-	"ANDS": "11101010000",
-	"ORR":  "10101010000",
-	"EOR":  "11101010000",
-	"LSL":  "11010011011",
-	"LSR":  "11010011010",
-	"BR":   "11010110000",
+	"ADD": {
+		"format":  R_FORMAT,
+		"op-code": "10001011000",
+	},
+	"SUB": {
+		"format":  R_FORMAT,
+		"op-code": "11001011000",
+	},
+	"ADDS": {
+		"format":  R_FORMAT,
+		"op-code": "10101011000",
+	},
+	"SUBS": {
+		"format":  R_FORMAT,
+		"op-code": "11101011000",
+	},
+	"AND": {
+		"format":  R_FORMAT,
+		"op-code": "10001010000",
+	},
+	"ANDS": {
+		"format":  R_FORMAT,
+		"op-code": "11101010000",
+	},
+	"ORR": {
+		"format":  R_FORMAT,
+		"op-code": "10101010000",
+	},
+	"EOR": {
+		"format":  R_FORMAT,
+		"op-code": "11101010000",
+	},
+	"LSL": {
+		"format":  R_FORMAT,
+		"op-code": "11010011011",
+	},
+	"LSR": {
+		"format":  R_FORMAT,
+		"op-code": "11010011010",
+	},
+	"BR": {
+		"format":  R_FORMAT,
+		"op-code": "11010110000",
+	},
 
 	// I format
-	"ADDI":  "1001000100",
-	"SUBI":  "1101000100",
-	"ADDIS": "1011000100",
-	"SUBIS": "1111000100",
-	"ANDI":  "1001001000",
-	"ANDIS": "1111001000",
-	"ORRI":  "1011001000",
-	"EORI":  "1101001000",
+	"ADDI": {
+		"format":  I_FORMAT,
+		"op-code": "1001000100",
+	},
+	"SUBI": {
+		"format":  I_FORMAT,
+		"op-code": "1101000100",
+	},
+	"ADDIS": {
+		"format":  I_FORMAT,
+		"op-code": "1011000100",
+	},
+	"SUBIS": {
+		"format":  I_FORMAT,
+		"op-code": "1111000100",
+	},
+	"ANDI": {
+		"format":  I_FORMAT,
+		"op-code": "1001001000",
+	},
+	"ANDIS": {
+		"format":  I_FORMAT,
+		"op-code": "1111001000",
+	},
+	"ORRI": {
+		"format":  I_FORMAT,
+		"op-code": "1011001000",
+	},
+	"EORI": {
+		"format":  I_FORMAT,
+		"op-code": "1101001000",
+	},
 
 	// D format
-	"LDUR":   "11111100010",
-	"STUR":   "11111100000",
-	"LDURSW": "10111000100",
-	"STURW":  "10111000000",
-	"LDURH":  "01111000010",
-	"STURH":  "01111000000",
-	"LDURB":  "00111000010",
-	"STURB":  "00111000000",
-	"LDXR":   "11001000010",
-	"STXR":   "11001000000",
+	"LDUR": {
+		"format":  D_FORMAT,
+		"op-code": "11111100010",
+	},
+	"STUR": {
+		"format":  D_FORMAT,
+		"op-code": "11111100000",
+	},
+	"LDURSW": {
+		"format":  D_FORMAT,
+		"op-code": "10111000100",
+	},
+	"STURW": {
+		"format":  D_FORMAT,
+		"op-code": "10111000000",
+	},
+	"LDURH": {
+		"format":  D_FORMAT,
+		"op-code": "01111000010",
+	},
+	"STURH": {
+		"format":  D_FORMAT,
+		"op-code": "01111000000",
+	},
+	"LDURB": {
+		"format":  D_FORMAT,
+		"op-code": "00111000010",
+	},
+	"STURB": {
+		"format":  D_FORMAT,
+		"op-code": "00111000000",
+	},
+	"LDXR": {
+		"format":  D_FORMAT,
+		"op-code": "11001000010",
+	},
+	"STXR": {
+		"format":  D_FORMAT,
+		"op-code": "11001000000",
+	},
 
-	// IM format
-	"MOVZ": "110100101",
-	"MOVK": "111100101",
+	// IW format
+	"MOVZ": {
+		"format":  IW_FORMAT,
+		"op-code": "110100101",
+	},
+	"MOVK": {
+		"format":  IW_FORMAT,
+		"op-code": "111100101",
+	},
 
 	// CB format
 
-	"CBZ":  "10110100",
-	"CBNZ": "10110101",
+	"CBZ": {
+		"format":  CB_FORMAT,
+		"op-code": "10110100",
+	},
+	"CBNZ": {
+		"format":  CB_FORMAT,
+		"op-code": "10110101",
+	},
 	// branch with condition, idk how to do, do later! opcode 01010100
 
 	// B format
-	"B":  "000101",
-	"BL": "100101",
+	"B": {
+		"format":  B_FORMAT,
+		"op-code": "000101",
+	},
+	"BL": {
+		"format":  B_FORMAT,
+		"op-code": "100101",
+	},
 }
 
 var RegistersBin Registers = Registers{
-	"X0":  "",
-	"X1":  "",
-	"X2":  "",
-	"X3":  "",
-	"X4":  "",
-	"X5":  "",
-	"X6":  "",
-	"X7":  "",
-	"X8":  "",
-	"X9":  "",
-	"X10": "",
-	"X11": "",
-	"X12": "",
-	"X13": "",
-	"X14": "",
-	"X15": "",
-	"X16": "",
-	"X17": "",
-	"X18": "",
-	"X19": "",
-	"X20": "",
-	"X21": "",
-	"X22": "",
-	"X23": "",
-	"X24": "",
-	"X25": "",
-	"X26": "",
-	"X27": "",
-	"X28": "",
-	"X29": "",
-	"X30": "",
-	"X31": "",
-	"IP0": "",
-	"IP1": "",
-	"SP":  "",
-	"FP":  "",
-	"LR":  "",
+	"X0":  "00000",
+	"X1":  "00001",
+	"X2":  "00010",
+	"X3":  "00011",
+	"X4":  "00100",
+	"X5":  "00101",
+	"X6":  "00110",
+	"X7":  "00111",
+	"X8":  "01000",
+	"X9":  "01001",
+	"X10": "01010",
+	"X11": "01011",
+	"X12": "01100",
+	"X13": "01101",
+	"X14": "01110",
+	"X15": "01111",
+	"X16": "10000",
+	"X17": "10001",
+	"X18": "10010",
+	"X19": "10011",
+	"X20": "10100",
+	"X21": "10101",
+	"X22": "10110",
+	"X23": "10111",
+	"X24": "11000",
+	"X25": "11001",
+	"X26": "11010",
+	"X27": "11010",
+	"X28": "11100",
+	"X29": "11101",
+	"X30": "11110",
+	"X31": "11111",
+	"IP0": "10000", //X16
+	"IP1": "10001", //X17
+	"SP":  "11100", //X28
+	"FP":  "11101", //X29
+	"LR":  "11110", //X30
 }
 
 /*

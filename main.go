@@ -4,8 +4,26 @@ import (
 	"fmt"
 	"legv8_assembler/isa"
 	"os"
+	"slices"
 	"strings"
 )
+
+func convert_numbers_to_binary(num int) string {
+	// var inital_string string = "b"
+	// var num_float float64 = float64(num)
+	// for num > 0 {
+	// 	inital_string += string(int(num_float) % 2)
+	// 	num_float = num_float / 2
+	// 	num = num / 2
+	// }
+
+	// return inital_string
+	if num == 0 || num == 1 {
+		return string(num)
+	}
+
+	return "" + convert_numbers_to_binary(num/2)
+}
 
 // type Registers map[string]string /*just create a fun to dynamic find the bin instead of this*/
 
@@ -65,7 +83,7 @@ func main() {
 		prod, ok := isa.Instructions[strings.Trim(z, ":")]
 
 		if ok {
-			fmt.Println("Invalid label ", z, " ", prod)
+			fmt.Println("Illegal label ", z, " ", prod)
 			continue
 		}
 
@@ -88,6 +106,8 @@ func main() {
 
 	}
 
+	var final_binary string = ""
+
 	for index, ins := range final_cut {
 		if ins == "" {
 			fmt.Println("Empty")
@@ -97,18 +117,65 @@ func main() {
 		ins = strings.TrimSpace(ins)
 		instruction_slice := strings.Split(ins, " ")
 		// what am I doibg here???????????????????????????????
-		// ins := slices.DeleteFunc(instruction_slice, func(n string) bool {
+		// instruction_slice2 := slices.DeleteFunc(instruction_slice, func(n string) bool {
 		// 	// return (instruction_slice[n] == " " || instruction_slice[n] == "\n")
-		// 	return n == "" || n == " " || n == "\n"
+		// 	return strings.TrimSpace(n) == "" || n == " " || n == "\n"
 		// })
+
+		// Invalid instructions has been covered in labeling, don't do it again.
 		// fmt.Println(strings.Join(ins, ""))
+		// final_binary = final_binary + isa.Instructions[instruction_slice[0]]
+		// fuck it check again if the instuction is there or not
+		switch isa.Instructions[strings.ToUpper(instruction_slice[0])]["format"] {
+
+		case isa.R_FORMAT:
+			// 3 different r formats, normal, with immediate and LR. considering there are only 3 odds, just use if
+			fmt.Println("R format")
+
+			if strings.EqualFold(strings.TrimSpace(instruction_slice[0]), "BR") {
+				// do for this
+			}
+
+			if strings.EqualFold(strings.TrimSpace(instruction_slice[0]), "LSL") ||
+				strings.EqualFold(strings.TrimSpace(instruction_slice[0]), "LSR") {
+				// do something
+			}
+
+		case isa.I_FORMAT:
+			fmt.Println("I format")
+
+		case isa.D_FORMAT:
+			fmt.Println("D format")
+		case isa.CB_FORMAT:
+			fmt.Println("CB format")
+		case isa.IW_FORMAT:
+			fmt.Println("IW FORMAT")
+		case isa.B_FORMAT:
+			// check for b if there then good
+
+			// 6 opcode 26 Address
+			final_binary += isa.Instructions[strings.ToUpper(instruction_slice[0])]["op-code"]
+			instruction_slice = slices.Delete(instruction_slice, 0, 1)
+			label := strings.TrimSpace(strings.Join(instruction_slice, ""))
+			label = label
+			// location, available := label_locations[label]
+			// if !available {
+			// 	fmt.Println("Invalid label ", label)
+			// }
+
+			final_binary += "0000000000000000000000"
+		}
 	}
 
+	fmt.Println("converted number to binary", convert_numbers_to_binary(100))
 	fmt.Println(strings.Join(final_cut, ""))
 	fmt.Println(len(final_cut))
 	for x, y := range final_cut {
 		fmt.Println(x, y)
 	}
 	fmt.Println(label_locations)
+	fmt.Println(
+		"final binary\n", final_binary,
+	)
 
 }
