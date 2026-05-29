@@ -37,7 +37,7 @@ func main() {
 
 		// there is an error with empty line where hassuffix function returns false fix it
 
-		_, m := isa.Instructions[z]
+		_, m := isa.Instructions[strings.ToUpper(z)]
 
 		if m {
 			fmt.Println("1 ", m)
@@ -53,7 +53,7 @@ func main() {
 			// os.Exit(1)
 			continue
 		}
-		prod, ok := isa.Instructions[strings.Trim(z, ":")]
+		prod, ok := isa.Instructions[strings.Trim(strings.ToUpper(z), ":")]
 
 		if ok {
 			fmt.Println("Illegal label ", z, " ", prod)
@@ -61,7 +61,6 @@ func main() {
 		}
 
 		label_locations[z] = loc
-		fmt.Println(z)
 
 		//I still have this problem "labelsomethign: instruction_next_to_it" send the instruction to the next line so that There won't be an location problems
 
@@ -103,7 +102,7 @@ func main() {
 		switch isa.Instructions[strings.ToUpper(instruction_slice)]["format"] {
 
 		case isa.R_FORMAT:
-
+			fmt.Println("here in r")
 			var testVar map[string]string = map[string]string{
 				"shamt": "000000",
 				"rm":    "00000", //placeholders for a reason
@@ -141,12 +140,14 @@ func main() {
 				rd, available := isa.RegistersBin[strings.ToUpper(strings.TrimSpace(test_space[0]))]
 				if !available {
 					// throw error
+					fmt.Println(strings.ToUpper(strings.TrimSpace(test_space[0])))
 					fmt.Println("invalid register")
 				}
 
 				rn, available := isa.RegistersBin[strings.ToUpper(strings.TrimSpace(test_space[1]))]
 				if !available {
 					// throw error
+					fmt.Println(test_space[1])
 					fmt.Println("invalid register")
 				}
 
@@ -183,7 +184,7 @@ func main() {
 
 			//change variable names
 			for x, z := range temp {
-				a, b := isa.RegistersBin[strings.TrimSpace(z)]
+				a, b := isa.RegistersBin[strings.ToUpper(strings.TrimSpace(z))]
 				if !b {
 					fmt.Println("Invalid register")
 					// throw an error
@@ -202,7 +203,39 @@ func main() {
 			final_binary += opcode["op-code"] + testVar["rm"] + testVar["shamt"] + testVar["rn"] + testVar["rd"]
 			break
 		case isa.I_FORMAT:
+			//opcode 10 immediate 12 rn 5 rd 5
 			fmt.Println("I format")
+			after = strings.TrimSpace(after)
+			test_space := strings.Split(after, ",")
+			if len(test_space) != 3 {
+				fmt.Println("error, number of arguments do not match")
+			}
+			opcode, _ := isa.Instructions[instruction_slice]
+			rn, rn_available := isa.RegistersBin[strings.ToUpper(strings.TrimSpace(test_space[0]))]
+			rd, rd_avaiable := isa.RegistersBin[strings.ToUpper(strings.TrimSpace(test_space[1]))]
+
+			if !(rn_available && rd_avaiable) {
+				fmt.Println("Invalid register")
+			}
+
+			string_imm := strings.Replace(strings.TrimSpace(test_space[2]), "#", "", 1)
+			integer_imm, err := strconv.Atoi(string_imm)
+
+			if integer_imm < 0 {
+				fmt.Println("error with immediate, non unsigned integer value")
+			}
+
+			if err != nil {
+				fmt.Println("error parsing and converting string to integer")
+			}
+
+			binary_imm := strconv.FormatUint(uint64(integer_imm), 2)
+
+			if len(binary_imm) > 12 {
+				fmt.Println("Problem with immediate, value too high")
+			}
+
+			final_binary += opcode["op-code"] + binary_imm + rn + rd
 
 		case isa.D_FORMAT:
 			fmt.Println("D format")
@@ -231,17 +264,12 @@ func main() {
 				location_binary = "0" + location_binary
 			}
 
+			fmt.Println("here in b, ", isa.Instructions[strings.ToUpper(instruction_slice)]["op-code"])
 			// 6 opcode 26 Address
 			final_binary += isa.Instructions[strings.ToUpper(instruction_slice)]["op-code"] + location_binary
 		}
 	}
 
-	fmt.Println(strings.Join(final_cut, ""))
-	fmt.Println(len(final_cut))
-	for x, y := range final_cut {
-		fmt.Println(x, y)
-	}
-	fmt.Println(label_locations)
 	fmt.Println(
 		"final binary\n", final_binary,
 	)
