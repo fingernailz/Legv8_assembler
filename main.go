@@ -89,16 +89,6 @@ func main() {
 		ins = strings.TrimSpace(ins)
 		instruction_slice, after, _ := strings.Cut(ins, " ")
 
-		// what am I doibg here???????????????????????????????
-		// instruction_slice2 := slices.DeleteFunc(instruction_slice, func(n string) bool {
-		// 	// return (instruction_slice[n] == " " || instruction_slice[n] == "\n")
-		// 	return strings.TrimSpace(n) == "" || n == " " || n == "\n"
-		// })
-
-		// Invalid instructions has been covered in labeling, don't do it again.
-		// fmt.Println(strings.Join(ins, ""))
-		// final_binary = final_binary + isa.Instructions[instruction_slice[0]]
-		// fuck it check again if the instuction is there or not
 		switch isa.Instructions[strings.ToUpper(instruction_slice)]["format"] {
 
 		case isa.R_FORMAT:
@@ -240,6 +230,7 @@ func main() {
 		case isa.D_FORMAT:
 			fmt.Println("D format")
 		case isa.CB_FORMAT:
+
 			fmt.Println("CB format")
 		case isa.IW_FORMAT:
 			fmt.Println("IW FORMAT")
