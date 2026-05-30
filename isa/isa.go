@@ -1,6 +1,7 @@
 package isa
 
-type ISA map[string]map[string]string
+import "legv8_assembler/types"
+
 type Registers map[string]string
 
 const (
@@ -14,7 +15,7 @@ const (
 
 // type Registers map[string]string /*just create a fun to dynamic find the bin instead of this*/
 
-var Instructions ISA = ISA{
+var Instructions types.ISA = types.ISA{
 	// R format
 	"ADD": {
 		"format":  R_FORMAT,
@@ -168,46 +169,6 @@ var Instructions ISA = ISA{
 		"format":  B_FORMAT,
 		"op-code": "100101",
 	},
-}
-
-var RegistersBin Registers = Registers{
-	"X0":  "00000",
-	"X1":  "00001",
-	"X2":  "00010",
-	"X3":  "00011",
-	"X4":  "00100",
-	"X5":  "00101",
-	"X6":  "00110",
-	"X7":  "00111",
-	"X8":  "01000",
-	"X9":  "01001",
-	"X10": "01010",
-	"X11": "01011",
-	"X12": "01100",
-	"X13": "01101",
-	"X14": "01110",
-	"X15": "01111",
-	"X16": "10000",
-	"X17": "10001",
-	"X18": "10010",
-	"X19": "10011",
-	"X20": "10100",
-	"X21": "10101",
-	"X22": "10110",
-	"X23": "10111",
-	"X24": "11000",
-	"X25": "11001",
-	"X26": "11010",
-	"X27": "11010",
-	"X28": "11100",
-	"X29": "11101",
-	"X30": "11110",
-	"X31": "11111",
-	"IP0": "10000", //X16
-	"IP1": "10001", //X17
-	"SP":  "11100", //X28
-	"FP":  "11101", //X29
-	"LR":  "11110", //X30
 }
 
 /*

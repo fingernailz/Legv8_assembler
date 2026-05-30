@@ -2,7 +2,10 @@ package main
 
 import (
 	"fmt"
+	"legv8_assembler/encoder"
 	"legv8_assembler/isa"
+	"legv8_assembler/registers"
+	"legv8_assembler/types"
 	"os"
 	"strconv"
 	"strings"
@@ -15,7 +18,7 @@ func main() {
 	if err != nil {
 		fmt.Println("OH FUCK")
 	}
-	var label_locations map[string]int = make(map[string]int)
+	var label_locations types.Labels = make(types.Labels)
 
 	var loc int = 0
 
@@ -92,109 +95,7 @@ func main() {
 		switch isa.Instructions[strings.ToUpper(instruction_slice)]["format"] {
 
 		case isa.R_FORMAT:
-			fmt.Println("here in r")
-			var testVar map[string]string = map[string]string{
-				"shamt": "000000",
-				"rm":    "00000", //placeholders for a reason
-				"rd":    "00000",
-				"rn":    "00000",
-			}
-			// 3 different r formats, normal, with immediate and LR. considering there are only 3 odds, just use if
-			fmt.Println("R format")
-
-			if strings.EqualFold(strings.TrimSpace(instruction_slice), "BR") {
-
-				// br register should be rn
-				// do for this
-				after = strings.TrimSpace(strings.ToUpper(after))
-				register_number, valid := isa.RegistersBin[after]
-				if !valid {
-					// throw error
-					fmt.Println("Invalid register for the instruction BR")
-				}
-
-				opcode, _ := isa.Instructions[instruction_slice]
-
-				final_binary += opcode["op-code"] + testVar["rm"] + testVar["shamt"] + register_number + testVar["rd"]
-			}
-
-			if strings.EqualFold(strings.TrimSpace(instruction_slice), "LSL") ||
-				strings.EqualFold(strings.TrimSpace(instruction_slice), "LSR") {
-				after = strings.TrimSpace(after)
-				test_space := strings.Split(after, ",")
-				// should be op rm shamt and rd
-				if len(test_space) != 3 {
-					// throw error
-					fmt.Println("Invalid amount of arguments")
-				}
-				rd, available := isa.RegistersBin[strings.ToUpper(strings.TrimSpace(test_space[0]))]
-				if !available {
-					// throw error
-					fmt.Println(strings.ToUpper(strings.TrimSpace(test_space[0])))
-					fmt.Println("invalid register")
-				}
-
-				rn, available := isa.RegistersBin[strings.ToUpper(strings.TrimSpace(test_space[1]))]
-				if !available {
-					// throw error
-					fmt.Println(test_space[1])
-					fmt.Println("invalid register")
-				}
-
-				if !strings.HasPrefix(test_space[2], "#") {
-					// throw error
-					fmt.Println("error")
-				}
-
-				string_shamt := strings.Replace(strings.TrimSpace(test_space[2]), "#", "", 1)
-				integer_shamt, err := strconv.Atoi(string_shamt)
-
-				if err != nil {
-					fmt.Println("error parsing and converting string to integer")
-				}
-
-				if integer_shamt > 31 || integer_shamt < 0 {
-					fmt.Println("Invalid number")
-				}
-
-				binary_shamt := strconv.FormatUint(uint64(integer_shamt), 2)
-				for x, y := 0, len(binary_shamt); x+y < 6; x++ {
-					binary_shamt = "0" + binary_shamt
-				}
-				// what
-				final_binary += isa.Instructions[instruction_slice]["op-code"] + "00000" + binary_shamt + rn + rd
-			}
-
-			temp := strings.Split(strings.TrimSpace(after), ",")
-
-			if len(temp) != 3 {
-				// throw error where we find there are not enough arguments fuck
-				fmt.Println("Not enough arguments")
-				break
-			}
-
-			//change name
-
-			//change variable names
-			for x, z := range temp {
-				a, b := isa.RegistersBin[strings.ToUpper(strings.TrimSpace(z))]
-				if !b {
-					fmt.Println("Invalid register")
-					// throw an error
-				}
-				testVar[func() string {
-					if x == 0 {
-						return "rd"
-					} else if x == 1 {
-						return "rn"
-					}
-					return "rm"
-				}()] = a
-			}
-			// opcode rm (second operand) shamt rn (first operand) rd (destination)
-			opcode, _ := isa.Instructions[instruction_slice]
-			final_binary += opcode["op-code"] + testVar["rm"] + testVar["shamt"] + testVar["rn"] + testVar["rd"]
-			break
+			final_binary += encoder.Call_r_format(ins)
 		case isa.I_FORMAT:
 			//opcode 10 immediate 12 rn 5 rd 5
 			fmt.Println("I format")
@@ -204,8 +105,8 @@ func main() {
 				fmt.Println("error, number of arguments do not match")
 			}
 			opcode, _ := isa.Instructions[instruction_slice]
-			rn, rn_available := isa.RegistersBin[strings.ToUpper(strings.TrimSpace(test_space[0]))]
-			rd, rd_avaiable := isa.RegistersBin[strings.ToUpper(strings.TrimSpace(test_space[1]))]
+			rn, rn_available := registers.RegistersBin[strings.ToUpper(strings.TrimSpace(test_space[0]))]
+			rd, rd_avaiable := registers.RegistersBin[strings.ToUpper(strings.TrimSpace(test_space[1]))]
 
 			if !(rn_available && rd_avaiable) {
 				fmt.Println("Invalid register")
@@ -248,7 +149,7 @@ func main() {
 				fmt.Println("error")
 			}
 
-			rd, avialable := isa.RegistersBin[strings.ToUpper(strings.TrimSpace(register))]
+			rd, avialable := registers.RegistersBin[strings.ToUpper(strings.TrimSpace(register))]
 			if !avialable {
 				fmt.Println("error")
 			}
@@ -265,7 +166,7 @@ func main() {
 				fmt.Println("error")
 			}
 
-			rn, available := isa.RegistersBin[strings.ToUpper(strings.TrimSpace(register2))]
+			rn, available := registers.RegistersBin[strings.ToUpper(strings.TrimSpace(register2))]
 			if !available {
 				fmt.Println("error")
 			}
@@ -306,12 +207,12 @@ func main() {
 			// have a seperate one fo B.cond
 
 			opcode, _ := isa.Instructions[instruction_slice]
-			rd, rd_available := isa.RegistersBin[strings.ToUpper(strings.TrimSpace(test_space[0]))]
+			rd, rd_available := registers.RegistersBin[strings.ToUpper(strings.TrimSpace(test_space[0]))]
 			if !rd_available {
 				fmt.Println("Error with register, Invalid register")
 			}
 
-			_, invalid_label := isa.RegistersBin[strings.ToUpper(strings.TrimSpace(test_space[1]))]
+			_, invalid_label := registers.RegistersBin[strings.ToUpper(strings.TrimSpace(test_space[1]))]
 
 			if invalid_label {
 				fmt.Println("Registers cannot be labeled as labels")
