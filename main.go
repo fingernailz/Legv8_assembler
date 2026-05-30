@@ -228,12 +228,51 @@ func main() {
 			final_binary += opcode["op-code"] + binary_imm + rn + rd
 
 		case isa.D_FORMAT:
+			// too much redundent work for this shit
 			fmt.Println("D format")
 		case isa.CB_FORMAT:
-
+			// opcode 8 location 19 condition register 5
+			// I've zero clue how to implement cb.<condition format>, REMIND LATER
 			fmt.Println("CB format")
+			after = strings.TrimSpace(after)
+			test_space := strings.Split(after, ",")
+
+			if len(test_space) > 2 || len(test_space) < 0 {
+				fmt.Println("Error, invalid number of arguments")
+			}
+
+			// have a seperate one fo B.cond
+
+			opcode, _ := isa.Instructions[instruction_slice]
+			rd, rd_available := isa.RegistersBin[strings.ToUpper(strings.TrimSpace(test_space[0]))]
+			if !rd_available {
+				fmt.Println("Error with register, Invalid register")
+			}
+
+			_, invalid_label := isa.RegistersBin[strings.ToUpper(strings.TrimSpace(test_space[1]))]
+
+			if invalid_label {
+				fmt.Println("Registers cannot be labeled as labels")
+			}
+
+			label, label_a := label_locations[strings.TrimSpace(test_space[1])]
+			if !label_a {
+				fmt.Println("invalid label")
+			}
+
+			binary_label_location := strconv.FormatUint(uint64(label), 2)
+			if len(binary_label_location) > 19 {
+				fmt.Println("Label location too hard to find or sometshit fix this")
+			}
+
+			for x := 0; x+len(binary_label_location) < 19; x++ {
+				binary_label_location = "0" + binary_label_location
+			}
+
+			final_binary += opcode["op-code"] + binary_label_location + rd
 		case isa.IW_FORMAT:
 			fmt.Println("IW FORMAT")
+			// I'm not doing IW format fuck it
 		case isa.B_FORMAT:
 			// check for b if there then good
 
