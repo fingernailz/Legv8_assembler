@@ -1,7 +1,6 @@
 package encoder
 
 import (
-	"fmt"
 	"legv8_assembler/errors"
 	"legv8_assembler/isa"
 	"legv8_assembler/registers"
@@ -11,7 +10,6 @@ import (
 
 // expect the argument to be alreadly trimmed of spaces
 func Register_format(instuction string) (string, error) {
-	fmt.Println("here in r")
 	instruction_slice, after, _ := strings.Cut(instuction, " ")
 	var testVar map[string]string = map[string]string{
 		"shamt": "000000",
@@ -20,7 +18,6 @@ func Register_format(instuction string) (string, error) {
 		"rn":    "00000",
 	}
 	// 3 different r formats, normal, with immediate and LR. considering there are only 3 odds, just use if
-	fmt.Println("R format")
 
 	if strings.EqualFold(strings.TrimSpace(instruction_slice), "BR") {
 
@@ -92,7 +89,7 @@ func Register_format(instuction string) (string, error) {
 	for x, z := range temp {
 		a, b := registers.RegistersBin[strings.ToUpper(strings.TrimSpace(z))]
 		if !b {
-			fmt.Println("Invalid register")
+			return "", errors.Invalid_register
 			// throw an error
 		}
 		testVar[func() string {
