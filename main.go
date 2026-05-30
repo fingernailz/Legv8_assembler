@@ -14,7 +14,7 @@ import (
 // type Registers map[string]string /*just create a fun to dynamic find the bin instead of this*/
 
 func main() {
-	/*;)*/ cnt, err := os.ReadFile("tesasdt.asm")
+	/*;)*/ cnt, err := os.ReadFile("test.asm")
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -44,7 +44,6 @@ func main() {
 		_, m := isa.Instructions[strings.ToUpper(z)]
 
 		if m {
-			fmt.Println("1 ", m)
 			inst, _, _ := strings.Cut(y, "//")
 			final_cut = append(final_cut, strings.TrimSpace(inst))
 			loc += 1
@@ -143,8 +142,6 @@ func main() {
 		}
 	}
 
-	fmt.Println(
-		"final binary\n", final_binary,
-	)
+	fmt.Println(final_binary)
 
 }
