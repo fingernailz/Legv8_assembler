@@ -158,6 +158,9 @@ func main() {
 				}
 
 				binary_shamt := strconv.FormatUint(uint64(integer_shamt), 2)
+				for x, y := 0, len(binary_shamt); x+y < 6; x++ {
+					binary_shamt = "0" + binary_shamt
+				}
 				// what
 				final_binary += isa.Instructions[instruction_slice]["op-code"] + "00000" + binary_shamt + rn + rd
 			}
@@ -225,11 +228,70 @@ func main() {
 				fmt.Println("Problem with immediate, value too high")
 			}
 
+			for x, y := 0, len(binary_imm); x+y < 12; x++ {
+				binary_imm = "0" + binary_imm
+			}
+
 			final_binary += opcode["op-code"] + binary_imm + rn + rd
 
 		case isa.D_FORMAT:
 			// too much redundent work for this shit
 			fmt.Println("D format")
+
+			//opcode 11, address 9, op2 2, base rn 5, source rd 5
+			after = strings.TrimSpace(after)
+			register, bracket_value, present := strings.Cut(after, ",")
+
+			opcode, _ := isa.Instructions[instruction_slice]
+
+			if !present {
+				fmt.Println("error")
+			}
+
+			rd, avialable := isa.RegistersBin[strings.ToUpper(strings.TrimSpace(register))]
+			if !avialable {
+				fmt.Println("error")
+			}
+
+			bracket_value = strings.TrimSpace(bracket_value)
+			if !(strings.HasPrefix(bracket_value, "[") && strings.HasSuffix(bracket_value, "]")) {
+				fmt.Println("Syntax error")
+			}
+
+			bracket_value = strings.Replace(bracket_value, "[", "", 1)
+			bracket_value = strings.Replace(bracket_value, "]", "", 1)
+			register2, immediate, present := strings.Cut(bracket_value, ",")
+			if !present {
+				fmt.Println("error")
+			}
+
+			rn, available := isa.RegistersBin[strings.ToUpper(strings.TrimSpace(register2))]
+			if !available {
+				fmt.Println("error")
+			}
+
+			immediate = strings.TrimSpace(immediate)
+			if !strings.HasPrefix(immediate, "#") {
+				fmt.Println("syntax error")
+			}
+
+			immediate = strings.Replace(immediate, "#", "", 1)
+			integer_immediate, err := strconv.Atoi(immediate)
+			if err != nil {
+				fmt.Println("Error with converting immediate to integer")
+			}
+
+			binary_immediate := strconv.FormatUint(uint64(integer_immediate), 2)
+			if len(binary_immediate) > 9 || len(binary_immediate) < 0 { // obv you wouldn't have less than 0 but anyways
+				fmt.Println("error with immediate")
+			}
+
+			for x, z := 0, len(binary_immediate); x+z < 9; x++ {
+				binary_immediate = "0" + binary_immediate
+			}
+
+			final_binary += opcode["op-code"] + binary_immediate + "00" /*opcode 2*/ + rn + rd
+
 		case isa.CB_FORMAT:
 			// opcode 8 location 19 condition register 5
 			// I've zero clue how to implement cb.<condition format>, REMIND LATER
@@ -265,7 +327,7 @@ func main() {
 				fmt.Println("Label location too hard to find or sometshit fix this")
 			}
 
-			for x := 0; x+len(binary_label_location) < 19; x++ {
+			for x, y := 0, len(binary_label_location); x+y < 19; x++ {
 				binary_label_location = "0" + binary_label_location
 			}
 
