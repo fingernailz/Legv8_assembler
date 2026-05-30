@@ -10,7 +10,7 @@ import (
 )
 
 // expect the argument to be alreadly trimmed of spaces
-func Call_r_format(instuction string) (string, error) {
+func Register_format(instuction string) (string, error) {
 	fmt.Println("here in r")
 	instruction_slice, after, _ := strings.Cut(instuction, " ")
 	var testVar map[string]string = map[string]string{

@@ -1,23 +1,23 @@
 package main
 
 import (
+	"errors"
 	"fmt"
-
 	"legv8_assembler/encoder"
+	legv8_errors "legv8_assembler/errors"
 	"legv8_assembler/isa"
-	"legv8_assembler/registers"
 	"legv8_assembler/types"
 	"os"
-	"strconv"
 	"strings"
 )
 
 // type Registers map[string]string /*just create a fun to dynamic find the bin instead of this*/
 
 func main() {
-	/*;)*/ cnt, err := os.ReadFile("test.asm")
+	/*;)*/ cnt, err := os.ReadFile("tesasdt.asm")
 	if err != nil {
-		fmt.Println("OH FUCK")
+		fmt.Println(err)
+		return
 	}
 	var label_locations types.Labels = make(types.Labels)
 
@@ -46,22 +46,19 @@ func main() {
 		if m {
 			fmt.Println("1 ", m)
 			inst, _, _ := strings.Cut(y, "//")
-			fmt.Println("val:", strings.TrimSpace(inst))
 			final_cut = append(final_cut, strings.TrimSpace(inst))
 			loc += 1
 			continue
 		}
 
 		if !strings.HasSuffix(z, ":") {
-			fmt.Println("Invalid instruction ", z)
-			// os.Exit(1)
-			continue
+			fmt.Print(legv8_errors.Invalid_instruction)
+			return
 		}
-		prod, ok := isa.Instructions[strings.Trim(strings.ToUpper(z), ":")]
+		_, ok := isa.Instructions[strings.Trim(strings.ToUpper(z), ":")]
 
 		if ok {
-			fmt.Println("Illegal label ", z, " ", prod)
-			continue
+			fmt.Println(legv8_errors.Illegal_label)
 		}
 
 		label_locations[z] = loc
@@ -74,194 +71,75 @@ func main() {
 		// final_cut = append(final_cut, label)
 		loc += 1
 		if found {
-			fmt.Println("the found ", instruction, len(instruction))
 			instruction, _, _ := strings.Cut(strings.TrimSpace(instruction), "//")
 			final_cut = append(final_cut, strings.TrimSpace(instruction))
 			loc += 1
 		}
-
 	}
 
 	var final_binary string = ""
 
-	for index, ins := range final_cut {
+	for _, ins := range final_cut {
 		if ins == "" {
-			fmt.Println("Empty")
 			continue
 		}
-		fmt.Println(index)
 		ins = strings.TrimSpace(ins)
-		instruction_slice, after, _ := strings.Cut(ins, " ")
+		instruction_slice, _, _ := strings.Cut(ins, " ")
 
 		switch isa.Instructions[strings.ToUpper(instruction_slice)]["format"] {
 
 		case isa.R_FORMAT:
-			encoded_value, _ := encoder.Call_r_format(ins)
-			final_binary += encoded_value
-		case isa.I_FORMAT:
-			//opcode 10 immediate 12 rn 5 rd 5
-			fmt.Println("I format")
-			after = strings.TrimSpace(after)
-			test_space := strings.Split(after, ",")
-			if len(test_space) != 3 {
-				fmt.Println("error, number of arguments do not match")
-			}
-			opcode, _ := isa.Instructions[instruction_slice]
-			rn, rn_available := registers.RegistersBin[strings.ToUpper(strings.TrimSpace(test_space[0]))]
-			rd, rd_avaiable := registers.RegistersBin[strings.ToUpper(strings.TrimSpace(test_space[1]))]
-
-			if !(rn_available && rd_avaiable) {
-				fmt.Println("Invalid register")
-			}
-
-			string_imm := strings.Replace(strings.TrimSpace(test_space[2]), "#", "", 1)
-			integer_imm, err := strconv.Atoi(string_imm)
-
-			if integer_imm < 0 {
-				fmt.Println("error with immediate, non unsigned integer value")
-			}
+			binary, err := encoder.Register_format(ins)
 
 			if err != nil {
-				fmt.Println("error parsing and converting string to integer")
+				fmt.Println(err)
+				return
 			}
 
-			binary_imm := strconv.FormatUint(uint64(integer_imm), 2)
+			final_binary += binary
+		case isa.I_FORMAT:
+			binary, err := encoder.Immediate_format(ins)
 
-			if len(binary_imm) > 12 {
-				fmt.Println("Problem with immediate, value too high")
+			if err != nil {
+				fmt.Println(err)
+				return
 			}
 
-			for x, y := 0, len(binary_imm); x+y < 12; x++ {
-				binary_imm = "0" + binary_imm
-			}
-
-			final_binary += opcode["op-code"] + binary_imm + rn + rd
+			final_binary += binary
 
 		case isa.D_FORMAT:
-			// too much redundent work for this shit
-			fmt.Println("D format")
+			binary, err := encoder.Load_store_format(ins)
 
-			//opcode 11, address 9, op2 2, base rn 5, source rd 5
-			after = strings.TrimSpace(after)
-			register, bracket_value, present := strings.Cut(after, ",")
-
-			opcode, _ := isa.Instructions[instruction_slice]
-
-			if !present {
-				fmt.Println("error")
-			}
-
-			rd, avialable := registers.RegistersBin[strings.ToUpper(strings.TrimSpace(register))]
-			if !avialable {
-				fmt.Println("error")
-			}
-
-			bracket_value = strings.TrimSpace(bracket_value)
-			if !(strings.HasPrefix(bracket_value, "[") && strings.HasSuffix(bracket_value, "]")) {
-				fmt.Println("Syntax error")
-			}
-
-			bracket_value = strings.Replace(bracket_value, "[", "", 1)
-			bracket_value = strings.Replace(bracket_value, "]", "", 1)
-			register2, immediate, present := strings.Cut(bracket_value, ",")
-			if !present {
-				fmt.Println("error")
-			}
-
-			rn, available := registers.RegistersBin[strings.ToUpper(strings.TrimSpace(register2))]
-			if !available {
-				fmt.Println("error")
-			}
-
-			immediate = strings.TrimSpace(immediate)
-			if !strings.HasPrefix(immediate, "#") {
-				fmt.Println("syntax error")
-			}
-
-			immediate = strings.Replace(immediate, "#", "", 1)
-			integer_immediate, err := strconv.Atoi(immediate)
 			if err != nil {
-				fmt.Println("Error with converting immediate to integer")
+				fmt.Println(err)
+				return
 			}
 
-			binary_immediate := strconv.FormatUint(uint64(integer_immediate), 2)
-			if len(binary_immediate) > 9 || len(binary_immediate) < 0 { // obv you wouldn't have less than 0 but anyways
-				fmt.Println("error with immediate")
-			}
-
-			for x, z := 0, len(binary_immediate); x+z < 9; x++ {
-				binary_immediate = "0" + binary_immediate
-			}
-
-			final_binary += opcode["op-code"] + binary_immediate + "00" /*opcode 2*/ + rn + rd
-
+			final_binary += binary
 		case isa.CB_FORMAT:
-			// opcode 8 location 19 condition register 5
-			// I've zero clue how to implement cb.<condition format>, REMIND LATER
-			fmt.Println("CB format")
-			after = strings.TrimSpace(after)
-			test_space := strings.Split(after, ",")
+			binary, err := encoder.Conditional_branch_format(ins, label_locations)
 
-			if len(test_space) > 2 || len(test_space) < 0 {
-				fmt.Println("Error, invalid number of arguments")
+			if err != nil {
+				fmt.Println(err)
+				return
 			}
 
-			// have a seperate one fo B.cond
-
-			opcode, _ := isa.Instructions[instruction_slice]
-			rd, rd_available := registers.RegistersBin[strings.ToUpper(strings.TrimSpace(test_space[0]))]
-			if !rd_available {
-				fmt.Println("Error with register, Invalid register")
-			}
-
-			_, invalid_label := registers.RegistersBin[strings.ToUpper(strings.TrimSpace(test_space[1]))]
-
-			if invalid_label {
-				fmt.Println("Registers cannot be labeled as labels")
-			}
-
-			label, label_a := label_locations[strings.TrimSpace(test_space[1])]
-			if !label_a {
-				fmt.Println("invalid label")
-			}
-
-			binary_label_location := strconv.FormatUint(uint64(label), 2)
-			if len(binary_label_location) > 19 {
-				fmt.Println("Label location too hard to find or sometshit fix this")
-			}
-
-			for x, y := 0, len(binary_label_location); x+y < 19; x++ {
-				binary_label_location = "0" + binary_label_location
-			}
-
-			final_binary += opcode["op-code"] + binary_label_location + rd
+			final_binary += binary
 		case isa.IW_FORMAT:
-			fmt.Println("IW FORMAT")
+			break
 			// I'm not doing IW format fuck it
 		case isa.B_FORMAT:
-			// check for b if there then good
+			binary, err := encoder.Branch_format(ins, label_locations)
 
-			// instruction_slice = slices.Delete(instruction_slice, 0, 1)
-			// label := strings.TrimSpace(strings.Join(instruction_slice, ""))
-			label := instruction_slice
-			location, available := label_locations[label]
-			if !available {
-				fmt.Println("Invalid label ", label)
+			if err != nil {
+				fmt.Println(err)
+				return
 			}
 
-			location_binary := strconv.FormatUint(uint64(location), 2)
+			final_binary += binary
 
-			if len(location_binary) > 26 {
-				fmt.Println("Error with location log")
-			}
-
-			for i := 0; i+len(location_binary) < 26; i++ {
-				location_binary = "0" + location_binary
-			}
-
-			fmt.Println("here in b, ", isa.Instructions[strings.ToUpper(instruction_slice)]["op-code"])
-			// 6 opcode 26 Address
-			final_binary += isa.Instructions[strings.ToUpper(instruction_slice)]["op-code"] + location_binary
+		default:
+			errors.New("Invalid Instuction").Error()
 		}
 	}
 

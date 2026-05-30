@@ -9,7 +9,7 @@ import (
 	"strings"
 )
 
-func Call_i_format(instruction string) (string, error) {
+func Immediate_format(instruction string) (string, error) {
 	fmt.Println("I format")
 	instruction_slice, after, _ := strings.Cut(instruction, " ")
 	after = strings.TrimSpace(after)
@@ -26,6 +26,10 @@ func Call_i_format(instruction string) (string, error) {
 	}
 
 	// check if # is present or not
+
+	if !strings.HasPrefix(strings.TrimSpace(test_space[2]), "#") {
+		return "", errors.Immediate_syntax_error
+	}
 
 	string_imm := strings.Replace(strings.TrimSpace(test_space[2]), "#", "", 1)
 	integer_imm, err := strconv.Atoi(string_imm)
