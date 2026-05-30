@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+
 	"legv8_assembler/encoder"
 	"legv8_assembler/isa"
 	"legv8_assembler/registers"
@@ -95,7 +96,8 @@ func main() {
 		switch isa.Instructions[strings.ToUpper(instruction_slice)]["format"] {
 
 		case isa.R_FORMAT:
-			final_binary += encoder.Call_r_format(ins)
+			encoded_value, _ := encoder.Call_r_format(ins)
+			final_binary += encoded_value
 		case isa.I_FORMAT:
 			//opcode 10 immediate 12 rn 5 rd 5
 			fmt.Println("I format")
