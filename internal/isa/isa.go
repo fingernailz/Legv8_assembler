@@ -1,6 +1,6 @@
 package isa
 
-import "legv8_assembler/types"
+import "legv8_assembler/internal/types"
 
 type Registers map[string]string
 

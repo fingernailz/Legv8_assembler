@@ -1,2 +1,5 @@
 test.go
 .vscode
+assembler 
+main
+test.asm

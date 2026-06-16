@@ -1,6 +1,6 @@
 package registers
 
-import "legv8_assembler/types"
+import "legv8_assembler/internal/types"
 
 var RegistersBin types.Registers = types.Registers{
 	"X0":  "00000",

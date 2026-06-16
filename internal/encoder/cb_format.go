@@ -1,10 +1,10 @@
 package encoder
 
 import (
-	"legv8_assembler/errors"
-	"legv8_assembler/isa"
-	"legv8_assembler/registers"
-	"legv8_assembler/types"
+	"legv8_assembler/internal/errors"
+	"legv8_assembler/internal/isa"
+	"legv8_assembler/internal/registers"
+	"legv8_assembler/internal/types"
 	"strconv"
 	"strings"
 )
