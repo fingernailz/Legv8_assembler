@@ -4,20 +4,19 @@ import (
 	"legv8_assembler/internal/errors"
 	"legv8_assembler/internal/isa"
 	"legv8_assembler/internal/registers"
-	"legv8_assembler/internal/types"
 	"strconv"
 	"strings"
 )
 
-func Conditional_branch_format(instruction string, label_locations types.Labels) (string, error) {
+func (cb *CBFormat) BinaryConversion() error {
 	// opcode 8 location 19 condition register 5
 	// I've zero clue how to implement cb.<condition format>, REMIND LATER
-	instruction_slice, after, _ := strings.Cut(instruction, " ")
+	instruction_slice, after, _ := strings.Cut(cb.Instruction.StringInstruction, " ")
 	after = strings.TrimSpace(after)
 	test_space := strings.Split(after, ",")
 
 	if len(test_space) > 2 {
-		return "", errors.Invalid_Number_of_Operands
+		return errors.Invalid_Number_of_Operands
 	}
 
 	// have a seperate one fo B.cond
@@ -25,28 +24,28 @@ func Conditional_branch_format(instruction string, label_locations types.Labels)
 	opcode, _ := isa.Instructions[instruction_slice]
 	rd, rd_available := registers.RegistersBin[strings.ToUpper(strings.TrimSpace(test_space[0]))]
 	if !rd_available {
-		return "", errors.Invalid_register
+		return errors.Invalid_register
 	}
 
 	_, invalid_label := registers.RegistersBin[strings.ToUpper(strings.TrimSpace(test_space[1]))]
 
 	if invalid_label {
-		return "", errors.Label_register_conflict
+		return errors.Label_register_conflict
 	}
 
 	label, label_a := label_locations[strings.TrimSpace(test_space[1])]
 	if !label_a {
-		return "", errors.Invalid_label
+		return errors.Invalid_label
 	}
 
 	binary_label_location := strconv.FormatUint(uint64(label), 2)
 	if len(binary_label_location) > 19 {
-		return "", errors.Label_location_out_of_bonds_error
+		return errors.Label_location_out_of_bonds_error
 	}
 
 	for x, y := 0, len(binary_label_location); x+y < 19; x++ {
 		binary_label_location = "0" + binary_label_location
 	}
 
-	return opcode["op-code"] + binary_label_location + rd, nil
+	return nil
 }

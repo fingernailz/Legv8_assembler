@@ -9,8 +9,8 @@ import (
 )
 
 // expect the argument to be alreadly trimmed of spaces
-func Register_format(instuction string) (string, error) {
-	instruction_slice, after, _ := strings.Cut(instuction, " ")
+func (rf *RFormat) BinaryConversion() error {
+	instruction_slice, after, _ := strings.Cut(rf.Instruction.StringInstruction, " ")
 	var testVar map[string]string = map[string]string{
 		"shamt": "000000",
 		"rm":    "00000", //placeholders for a reason
@@ -27,12 +27,12 @@ func Register_format(instuction string) (string, error) {
 		register_number, valid := registers.RegistersBin[after]
 		if !valid {
 			// throw error
-			return "", errors.Invalid_register
+			return errors.Invalid_register
 		}
 
 		opcode, _ := isa.Instructions[instruction_slice]
 
-		return opcode["op-code"] + testVar["rm"] + testVar["shamt"] + register_number + testVar["rd"], nil
+		return nil
 	}
 
 	if strings.EqualFold(strings.TrimSpace(instruction_slice), "LSL") ||
@@ -41,31 +41,31 @@ func Register_format(instuction string) (string, error) {
 		test_space := strings.Split(after, ",")
 		// should be op rm shamt and rd
 		if len(test_space) != 3 {
-			return "", errors.Invalid_Number_of_Operands
+			return errors.Invalid_Number_of_Operands
 		}
 		rd, available := registers.RegistersBin[strings.ToUpper(strings.TrimSpace(test_space[0]))]
 		if !available {
-			return "", errors.Invalid_register
+			return errors.Invalid_register
 		}
 
 		rn, available := registers.RegistersBin[strings.ToUpper(strings.TrimSpace(test_space[1]))]
 		if !available {
-			return "", errors.Invalid_register
+			return errors.Invalid_register
 		}
 
 		if !strings.HasPrefix(test_space[2], "#") {
-			return "", errors.Immediate_syntax_error
+			return errors.Immediate_syntax_error
 		}
 
 		string_shamt := strings.Replace(strings.TrimSpace(test_space[2]), "#", "", 1)
 		integer_shamt, err := strconv.Atoi(string_shamt)
 
 		if err != nil {
-			return "", errors.Shamt_parsing_error
+			return errors.Shamt_parsing_error
 		}
 
 		if integer_shamt > 31 || integer_shamt < 0 {
-			return "", errors.Shamt_value_error
+			return errors.Shamt_value_error
 		}
 
 		binary_shamt := strconv.FormatUint(uint64(integer_shamt), 2)
@@ -73,14 +73,14 @@ func Register_format(instuction string) (string, error) {
 			binary_shamt = "0" + binary_shamt
 		}
 		// what
-		return isa.Instructions[instruction_slice]["op-code"] + "00000" + binary_shamt + rn + rd, nil
+		return nil
 	}
 
 	temp := strings.Split(strings.TrimSpace(after), ",")
 
 	if len(temp) != 3 {
 		// throw error where we find there are not enough arguments fuck
-		return "", errors.Invalid_Number_of_Operands
+		return errors.Invalid_Number_of_Operands
 	}
 
 	//change name
@@ -89,7 +89,7 @@ func Register_format(instuction string) (string, error) {
 	for x, z := range temp {
 		a, b := registers.RegistersBin[strings.ToUpper(strings.TrimSpace(z))]
 		if !b {
-			return "", errors.Invalid_register
+			return errors.Invalid_register
 			// throw an error
 		}
 		testVar[func() string {
@@ -103,5 +103,5 @@ func Register_format(instuction string) (string, error) {
 	}
 	// opcode rm (second operand) shamt rn (first operand) rd (destination)
 	opcode, _ := isa.Instructions[instruction_slice]
-	return opcode["op-code"] + testVar["rm"] + testVar["shamt"] + testVar["rn"] + testVar["rd"], nil
+	return nil
 }
