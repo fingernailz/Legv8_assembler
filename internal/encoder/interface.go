@@ -1,13 +1,17 @@
 package encoder
 
-type BinaryConversion interface {
-	BinaryConversion() error
+type InstructionInterface interface {
+	InstructionInformation
 }
+
+//type BinaryConversion interface {
+//BinaryConversion() error
+//}
 
 type InstructionInformation struct {
 	StringInstruction string
 	BinaryInstruction string
-	BinaryConversion  BinaryConversion
+	//BinaryConversion  BinaryConversion
 }
 
 type RFormat struct {

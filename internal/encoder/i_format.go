@@ -2,20 +2,18 @@ package encoder
 
 import (
 	"legv8_assembler/internal/errors"
-	"legv8_assembler/internal/isa"
 	"legv8_assembler/internal/registers"
 	"strconv"
 	"strings"
 )
 
 func (imm *IFormat) BinaryConversion() error {
-	instruction_slice, after, _ := strings.Cut(imm.Instruction.StringInstruction, " ")
+	_, after, _ := strings.Cut(imm.Instruction.StringInstruction, " ")
 	after = strings.TrimSpace(after)
 	test_space := strings.Split(after, ",")
 	if len(test_space) != 3 {
 		return errors.Invalid_Number_of_Operands
 	}
-	opcode, _ := isa.Instructions[instruction_slice]
 	rn, rn_available := registers.RegistersBin[strings.ToUpper(strings.TrimSpace(test_space[0]))]
 	rd, rd_avaiable := registers.RegistersBin[strings.ToUpper(strings.TrimSpace(test_space[1]))]
 
@@ -50,5 +48,18 @@ func (imm *IFormat) BinaryConversion() error {
 		binary_imm = "0" + binary_imm
 	}
 
+	imm.Rn = rn
+	imm.Rd = rd
+	imm.Immediate = binary_imm
+
 	return nil
+}
+
+func (instruction *IFormat) Assemble() {
+	// opcode + immediate + rn + rd
+	instruction.Instruction.BinaryInstruction =
+		instruction.Opcode +
+			instruction.Immediate +
+			instruction.Rn +
+			instruction.Rd
 }

@@ -3,7 +3,6 @@ package encoder
 import (
 	"fmt"
 	"legv8_assembler/internal/errors"
-	"legv8_assembler/internal/isa"
 	"legv8_assembler/internal/registers"
 	"strconv"
 	"strings"
@@ -12,13 +11,11 @@ import (
 func (ls *DFormat) BinaryConversion() error {
 
 	fmt.Println("D format")
-	instruction_slice, after, _ := strings.Cut(ls.Instruction.StringInstruction, " ")
+	_, after, _ := strings.Cut(ls.Instruction.StringInstruction, " ")
 
 	//opcode 11, address 9, op2 2, base rn 5, source rd 5
 	after = strings.TrimSpace(after)
 	register, bracket_value, present := strings.Cut(after, ",")
-
-	opcode, _ := isa.Instructions[instruction_slice]
 
 	if !present {
 		return errors.Invalid_syntax
@@ -66,5 +63,20 @@ func (ls *DFormat) BinaryConversion() error {
 		binary_immediate = "0" + binary_immediate
 	}
 
+	ls.Rd = rd
+	ls.Rn = rn
+	ls.Address = binary_immediate
+	ls.Opcode2 = "00" //change this later
+
 	return nil
+}
+
+func (instruction *DFormat) Assemble() {
+	// op1 + address + op2 + rn + rt
+	instruction.Instruction.BinaryInstruction =
+		instruction.Opcode +
+			instruction.Address +
+			instruction.Opcode2 +
+			instruction.Rn +
+			instruction.Rd
 }

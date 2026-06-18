@@ -2,7 +2,6 @@ package encoder
 
 import (
 	"legv8_assembler/internal/errors"
-	"legv8_assembler/internal/isa"
 	"legv8_assembler/internal/registers"
 	"strconv"
 	"strings"
@@ -24,13 +23,17 @@ func (rf *RFormat) BinaryConversion() error {
 		// br register should be rn
 		// do for this
 		after = strings.TrimSpace(strings.ToUpper(after))
-		register_number, valid := registers.RegistersBin[after]
+		//wat the fuck is this, fair engh
+		rn, valid := registers.RegistersBin[after]
 		if !valid {
 			// throw error
 			return errors.Invalid_register
 		}
 
-		opcode, _ := isa.Instructions[instruction_slice]
+		rf.Rn = rn
+		rf.Rm = testVar["rm"]
+		rf.Rd = testVar["rd"]
+		rf.Shamt = testVar["shamt"]
 
 		return nil
 	}
@@ -72,6 +75,11 @@ func (rf *RFormat) BinaryConversion() error {
 		for x, y := 0, len(binary_shamt); x+y < 6; x++ {
 			binary_shamt = "0" + binary_shamt
 		}
+
+		rf.Rd = rd
+		rf.Rn = rn
+		rf.Rm = testVar["rm"]
+		rf.Shamt = binary_shamt
 		// what
 		return nil
 	}
@@ -101,7 +109,21 @@ func (rf *RFormat) BinaryConversion() error {
 			return "rm"
 		}()] = a
 	}
+
+	rf.Rn = testVar["rn"]
+	rf.Rm = testVar["rm"]
+	rf.Rd = testVar["rd"]
+	rf.Shamt = testVar["shamt"]
 	// opcode rm (second operand) shamt rn (first operand) rd (destination)
-	opcode, _ := isa.Instructions[instruction_slice]
 	return nil
+}
+
+func (instruction *RFormat) Assemble() {
+	//opcode + rm + shamt + rn + rd
+	instruction.Instruction.BinaryInstruction =
+		instruction.Opcode +
+			instruction.Rm +
+			instruction.Shamt +
+			instruction.Rn +
+			instruction.Rd
 }

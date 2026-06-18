@@ -2,18 +2,18 @@ package encoder
 
 import (
 	"legv8_assembler/internal/errors"
-	"legv8_assembler/internal/isa"
+	"legv8_assembler/internal/types"
 	"strconv"
 	"strings"
 )
 
 // something is wrong idk FIX plz
-func (b *BFormat) BinaryConversion() error {
+func (b *BFormat) BinaryConversion(label_locations types.Labels) error {
 	// check for b if there then good
 
 	// instruction_slice = slices.Delete(instruction_slice, 0, 1)
 	// label := strings.TrimSpace(strings.Join(instruction_slice, ""))
-	instruction_slice, after, comma := strings.Cut(b.Instruction.StringInstruction, " ")
+	_, after, comma := strings.Cut(b.Instruction.StringInstruction, " ")
 
 	if !comma {
 		return errors.Invalid_syntax
@@ -35,6 +35,14 @@ func (b *BFormat) BinaryConversion() error {
 		location_binary = "0" + location_binary
 	}
 
+	b.BranchAddress = location_binary
+
 	// 6 opcode 26 Address
-	return isa.Instructions[strings.ToUpper(instruction_slice)]["op-code"] + location_binary, nil
+	return nil
+}
+
+func (instruction *BFormat) Assemble() {
+	instruction.Instruction.BinaryInstruction =
+		instruction.Opcode +
+			instruction.BranchAddress
 }

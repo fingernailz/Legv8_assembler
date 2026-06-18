@@ -2,16 +2,16 @@ package encoder
 
 import (
 	"legv8_assembler/internal/errors"
-	"legv8_assembler/internal/isa"
 	"legv8_assembler/internal/registers"
+	"legv8_assembler/internal/types"
 	"strconv"
 	"strings"
 )
 
-func (cb *CBFormat) BinaryConversion() error {
+func (cb *CBFormat) BinaryConversion(label_locations types.Labels) error {
 	// opcode 8 location 19 condition register 5
 	// I've zero clue how to implement cb.<condition format>, REMIND LATER
-	instruction_slice, after, _ := strings.Cut(cb.Instruction.StringInstruction, " ")
+	_, after, _ := strings.Cut(cb.Instruction.StringInstruction, " ")
 	after = strings.TrimSpace(after)
 	test_space := strings.Split(after, ",")
 
@@ -21,9 +21,8 @@ func (cb *CBFormat) BinaryConversion() error {
 
 	// have a seperate one fo B.cond
 
-	opcode, _ := isa.Instructions[instruction_slice]
-	rd, rd_available := registers.RegistersBin[strings.ToUpper(strings.TrimSpace(test_space[0]))]
-	if !rd_available {
+	rt, rt_available := registers.RegistersBin[strings.ToUpper(strings.TrimSpace(test_space[0]))]
+	if !rt_available {
 		return errors.Invalid_register
 	}
 
@@ -47,5 +46,15 @@ func (cb *CBFormat) BinaryConversion() error {
 		binary_label_location = "0" + binary_label_location
 	}
 
+	cb.BranchAddress = binary_label_location
+	cb.Rt = rt
+
 	return nil
+}
+
+func (instruction *CBFormat) Assemble() {
+	instruction.Instruction.BinaryInstruction =
+		instruction.Opcode +
+			instruction.BranchAddress +
+			instruction.Rt
 }

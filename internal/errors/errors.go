@@ -4,6 +4,7 @@ import (
 	"errors"
 )
 
+// ahhhh change these
 var (
 	Invalid_register                  = errors.New("Invalid register")
 	Invalid_Number_of_Operands        = errors.New("Not enough operands to work with")
