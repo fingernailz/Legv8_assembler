@@ -5,13 +5,18 @@ import (
 	"bytes"
 	"context"
 	"legv8_assembler/internal/parser"
+	"legv8_assembler/internal/types"
 	"log"
 	"strings"
 )
 
-func Lexer(instruction string, sliceptr *[]any, ctx *context.Context) {
+func Lexer(instruction string, sliceptr *[]types.BinaryConversioninter, ctx *context.Context) {
 	//to check if it a comment
 	if strings.HasPrefix(instruction, "//") {
+		return
+	}
+
+	if strings.TrimSpace(instruction) == "" || instruction == "\n" {
 		return
 	}
 
@@ -22,6 +27,10 @@ func Lexer(instruction string, sliceptr *[]any, ctx *context.Context) {
 	instruction = strings.TrimSpace(instruction)
 	instruction2, _, _ := strings.Cut(instruction, "//")
 	instructionSlice := strings.Fields(strings.ToUpper(instruction2))
+
+	if len(instructionSlice) < 2 {
+		return
+	}
 
 	out, err := parser.ParseInstruction(instructionSlice, ctx)
 	if err != nil {
@@ -35,12 +44,12 @@ func Lexer(instruction string, sliceptr *[]any, ctx *context.Context) {
 
 }
 
-func LexerInit(file []byte, ctx *context.Context) []any {
-	sliceptr := make([]any, bytes.Count(file, []byte{'\n'}))
+func LexerInit(file []byte, ctx *context.Context) []types.BinaryConversioninter {
+	sliceptr := make([]types.BinaryConversioninter, bytes.Count(file, []byte{'\n'}))
 	reader := bytes.NewReader(file)
 	scanner := bufio.NewScanner(reader)
 	for scanner.Scan() {
-		Lexer(scanner.Text(), &sliceptr, ctx)
+		Lexer(strings.TrimSpace(scanner.Text()), &sliceptr, ctx)
 	}
 
 	return sliceptr

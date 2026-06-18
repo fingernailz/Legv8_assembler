@@ -80,3 +80,7 @@ func (instruction *DFormat) Assemble() {
 			instruction.Rn +
 			instruction.Rd
 }
+
+func (instruction *DFormat) GetBinary() string {
+	return instruction.Instruction.BinaryInstruction
+}

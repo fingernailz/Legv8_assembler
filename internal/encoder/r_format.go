@@ -127,3 +127,6 @@ func (instruction *RFormat) Assemble() {
 			instruction.Rn +
 			instruction.Rd
 }
+func (instruction *RFormat) GetBinary() string {
+	return instruction.Instruction.BinaryInstruction
+}

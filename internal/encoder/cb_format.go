@@ -2,13 +2,13 @@ package encoder
 
 import (
 	"legv8_assembler/internal/errors"
+	"legv8_assembler/internal/labels"
 	"legv8_assembler/internal/registers"
-	"legv8_assembler/internal/types"
 	"strconv"
 	"strings"
 )
 
-func (cb *CBFormat) BinaryConversion(label_locations types.Labels) error {
+func (cb *CBFormat) BinaryConversion() error {
 	// opcode 8 location 19 condition register 5
 	// I've zero clue how to implement cb.<condition format>, REMIND LATER
 	_, after, _ := strings.Cut(cb.Instruction.StringInstruction, " ")
@@ -32,7 +32,7 @@ func (cb *CBFormat) BinaryConversion(label_locations types.Labels) error {
 		return errors.Label_register_conflict
 	}
 
-	label, label_a := label_locations[strings.TrimSpace(test_space[1])]
+	label, label_a := labels.LabelLocation[strings.TrimSpace(test_space[1])]
 	if !label_a {
 		return errors.Invalid_label
 	}
@@ -57,4 +57,8 @@ func (instruction *CBFormat) Assemble() {
 		instruction.Opcode +
 			instruction.BranchAddress +
 			instruction.Rt
+}
+
+func (instruction *CBFormat) GetBinary() string {
+	return instruction.Instruction.BinaryInstruction
 }

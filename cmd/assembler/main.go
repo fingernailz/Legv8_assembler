@@ -3,17 +3,36 @@ package main
 import (
 	"context"
 	"fmt"
-	"legv8_assembler/internal/encoder"
 	"legv8_assembler/internal/lexer"
 	"legv8_assembler/internal/types"
 	"log"
 	"os"
+	"sync"
 )
 
-// type Registers map[string]string /*just create a fun to dynamic find the bin instead of this*/
+func worker(jobs <-chan types.BinaryConversioninter, wg *sync.WaitGroup) {
+	defer wg.Done()
+	for instruction := range jobs {
+		if instruction == nil {
+			continue
+		}
+		err := instruction.BinaryConversion()
+		if err != nil {
+			log.Fatal(err)
+		}
+		instruction.Assemble()
+	}
+}
+
+// func worker(jobs <- `j`)
+
+// type Registers map[string]string /*just create a fun to dynamic find the bin instead of this*/o
+
+func someinterface(w types.InstructionInformation) string {
+	return w.BinaryInstruction
+}
 
 func main() {
-	//	/*;)*/ cnt, err := os.ReadFile("test.asm")
 
 	ctx := context.Background()
 	ctx, cancel := context.WithCancel(ctx)
@@ -26,137 +45,39 @@ func main() {
 	ctx = context.WithValue(ctx, "filesize", []any{})
 
 	instructionSlice := lexer.LexerInit(file, &ctx)
+	wg := sync.WaitGroup{}
 
-	for _, y := range instructionSlice {
-		switch z := y.(type) {
-		case *encoder.RFormat:
-			fmt.Println(*z)
-		}
+	jobchannel := make(chan types.BinaryConversioninter)
+
+	for i := 0; i < 3; i++ {
+		wg.Add(1)
+		go worker(jobchannel, &wg)
 	}
 
-	// var label_locations types.Labels = make(types.Labels)
+	// go homieWorker()
 
-	// var loc int = 0
+	for _, y := range instructionSlice {
+		fmt.Println(y)
+		jobchannel <- y
+	}
+	close(jobchannel)
+	//3 worker would be fine
 
-	// // Labeling and formatting
-	// var final_cut []any = make([]any, len(strings.Split(string(cnt), "\n"))) // labels with instructions add more length for that
+	wg.Wait()
 
-	// for _, y := range strings.Split(string(cnt), "\n") {
+	cntToWrite := ""
+	for _, y := range instructionSlice {
+		if y == nil {
+			continue
+		}
+		cntToWrite += y.GetBinary()
+	}
 
-	// 	if /*(y == "\n"O ||*/ strings.HasPrefix(strings.TrimSpace(y), "//") {
-	// 		continue
-	// 	}
+	smt := os.WriteFile("output.o", []byte(cntToWrite), 0644)
 
-	// 	if len(y) == 0 {
-	// 		continue
-	// 	}
+	if smt != nil {
+		log.Fatal(smt)
+	}
 
-	// 	// "  ADD x1, x1, x3" first remove the space from the sentance then split wrt space and trimspace for safety to get the instruction or label
-	// 	z := strings.TrimSpace(strings.Split(strings.TrimSpace(y), " ")[0])
-
-	// 	// there is an error with empty line where hassuffix function returns false fix it
-
-	// 	_, m := isa.Instructions[strings.ToUpper(z)]
-
-	// 	if m {
-	// 		inst, _, _ := strings.Cut(y, "//")
-	// 		final_cut = append(final_cut, strings.TrimSpace(inst))
-	// 		loc += 1
-	// 		continue
-	// 	}
-
-	// 	if !strings.HasSuffix(z, ":") {
-	// 		fmt.Print(legv8_errors.Invalid_instruction)
-	// 		return
-	// 	}
-	// 	_, ok := isa.Instructions[strings.Trim(strings.ToUpper(z), ":")]
-
-	// 	if ok {
-	// 		fmt.Println(legv8_errors.Illegal_label)
-	// 	}
-
-	// 	label_locations[z] = loc
-
-	// 	//I still have this problem "labelsomethign: instruction_next_to_it" send the instruction to the next line so that There won't be an location problems
-
-	// 	//this could be the solutioon
-	// 	// problem with y thats y new line always
-	// 	_, instruction, found := strings.Cut(strings.TrimSpace(y), " ")
-	// 	// final_cut = append(final_cut, label)
-	// 	loc += 1
-	// 	if found {
-	// 		instruction, _, _ := strings.Cut(strings.TrimSpace(instruction), "//")
-	// 		final_cut = append(final_cut, strings.TrimSpace(instruction))
-	// 		loc += 1
-	// 	}
-	// }
-
-	// var final_binary string = ""
-
-	// for _, ins := range final_cut {
-	// 	if ins == "" {
-	// 		continue
-	// 	}
-	// 	ins = strings.TrimSpace(ins)
-	// 	instruction_slice, _, _ := strings.Cut(ins, " ")
-
-	// 	switch isa.Instructions[strings.ToUpper(instruction_slice)]["format"] {
-
-	// 	case isa.R_FORMAT:
-	// 		binary, err := encoder.Register_format(ins)
-
-	// 		if err != nil {
-	// 			fmt.Println(err)
-	// 			return
-	// 		}
-
-	// 		final_binary += binary
-	// 	case isa.I_FORMAT:
-	// 		binary, err := encoder.Immediate_format(ins)
-
-	// 		if err != nil {
-	// 			fmt.Println(err)
-	// 			return
-	// 		}
-
-	// 		final_binary += binary
-
-	// 	case isa.D_FORMAT:
-	// 		binary, err := encoder.Load_store_format(ins)
-
-	// 		if err != nil {
-	// 			fmt.Println(err)
-	// 			return
-	// 		}
-
-	// 		final_binary += binary
-	// 	case isa.CB_FORMAT:
-	// 		binary, err := encoder.Conditional_branch_format(ins, label_locations)
-
-	// 		if err != nil {
-	// 			fmt.Println(err)
-	// 			return
-	// 		}
-
-	// 		final_binary += binary
-	// 	case isa.IW_FORMAT:
-	// 		break
-	// 		// I'm not doing IW format fuck it
-	// 	case isa.B_FORMAT:
-	// 		binary, err := encoder.Branch_format(ins, label_locations)
-
-	// 		if err != nil {
-	// 			fmt.Println(err)
-	// 			return
-	// 		}
-
-	// 		final_binary += binary
-
-	// 	default:
-	// 		errors.New("Invalid Instuction").Error()
-	// 	}
-	// }
-
-	// fmt.Println(final_binary)
-
+	fmt.Println("CHECK SOMEHTING")
 }

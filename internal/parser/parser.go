@@ -5,17 +5,17 @@ import (
 	"errors"
 	"legv8_assembler/internal/encoder"
 	"legv8_assembler/internal/isa"
+	"legv8_assembler/internal/labels"
 	"legv8_assembler/internal/types"
 	"log"
 	"strings"
 )
 
 // try creating a context thing it would be easier
-var LabelLocation types.Labels
 var instructionCount int = 0
 var instructionCounter int = 0
 
-func ParseInstruction(instructionSlice []string, ctx *context.Context) (any, error) {
+func ParseInstruction(instructionSlice []string, ctx *context.Context) (types.BinaryConversioninter, error) {
 	if len(instructionSlice) > 4 {
 		return nil, errors.New("SHUM ERROR")
 	}
@@ -38,8 +38,9 @@ func ParseInstruction(instructionSlice []string, ctx *context.Context) (any, err
 	case isa.R_FORMAT:
 		rformat := encoder.RFormat{
 			Opcode: ins["op-code"],
-			Instruction: encoder.InstructionInformation{
+			Instruction: types.InstructionInformation{
 				StringInstruction: strings.Join(instructionSlice, " "),
+				BinaryInstruction: "",
 			},
 		}
 		instructionCount += 1
@@ -47,8 +48,9 @@ func ParseInstruction(instructionSlice []string, ctx *context.Context) (any, err
 	case isa.I_FORMAT:
 		iformat := encoder.RFormat{
 			Opcode: ins["op-code"],
-			Instruction: encoder.InstructionInformation{
+			Instruction: types.InstructionInformation{
 				StringInstruction: strings.Join(instructionSlice, " "),
+				BinaryInstruction: "",
 			},
 		}
 		instructionCount += 1
@@ -56,8 +58,9 @@ func ParseInstruction(instructionSlice []string, ctx *context.Context) (any, err
 	case isa.D_FORMAT:
 		dformat := encoder.DFormat{
 			Opcode: ins["op-code"],
-			Instruction: encoder.InstructionInformation{
+			Instruction: types.InstructionInformation{
 				StringInstruction: strings.Join(instructionSlice, " "),
+				BinaryInstruction: "",
 			},
 		}
 		instructionCount += 1
@@ -66,8 +69,9 @@ func ParseInstruction(instructionSlice []string, ctx *context.Context) (any, err
 	case isa.B_FORMAT:
 		bformat := encoder.BFormat{
 			Opcode: ins["op-code"],
-			Instruction: encoder.InstructionInformation{
+			Instruction: types.InstructionInformation{
 				StringInstruction: strings.Join(instructionSlice, " "),
+				BinaryInstruction: "",
 			},
 		}
 		instructionCount += 1
@@ -76,8 +80,9 @@ func ParseInstruction(instructionSlice []string, ctx *context.Context) (any, err
 	case isa.CB_FORMAT:
 		cbformat := encoder.CBFormat{
 			Opcode: ins["op-code"],
-			Instruction: encoder.InstructionInformation{
+			Instruction: types.InstructionInformation{
 				StringInstruction: strings.Join(instructionSlice, " "),
+				BinaryInstruction: "",
 			},
 		}
 		instructionCount += 1
@@ -106,10 +111,10 @@ func checkForLabels(instructionSlice []string, ctx *context.Context) error {
 		}
 	}
 
-	if _, ok := LabelLocation[strings.ReplaceAll(instructionSlice[0], ":", "")]; ok {
+	if _, ok := labels.LabelLocation[strings.ReplaceAll(instructionSlice[0], ":", "")]; ok {
 		return errors.New("Label already exists")
 	}
 
-	LabelLocation[strings.ReplaceAll(instructionSlice[0], ":", "")] = instructionCount
+	labels.LabelLocation[strings.ReplaceAll(instructionSlice[0], ":", "")] = instructionCount
 	return nil
 }

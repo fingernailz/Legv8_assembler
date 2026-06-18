@@ -63,3 +63,6 @@ func (instruction *IFormat) Assemble() {
 			instruction.Rn +
 			instruction.Rd
 }
+func (instruction *IFormat) GetBinary() string {
+	return instruction.Instruction.BinaryInstruction
+}

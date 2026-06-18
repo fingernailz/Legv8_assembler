@@ -1,18 +1,6 @@
 package encoder
 
-type InstructionInterface interface {
-	InstructionInformation
-}
-
-//type BinaryConversion interface {
-//BinaryConversion() error
-//}
-
-type InstructionInformation struct {
-	StringInstruction string
-	BinaryInstruction string
-	//BinaryConversion  BinaryConversion
-}
+import "legv8_assembler/internal/types"
 
 type RFormat struct {
 	Opcode      string
@@ -20,7 +8,7 @@ type RFormat struct {
 	Shamt       string
 	Rn          string
 	Rd          string
-	Instruction InstructionInformation
+	Instruction types.InstructionInformation
 }
 
 type IFormat struct {
@@ -28,7 +16,7 @@ type IFormat struct {
 	Immediate   string
 	Rn          string
 	Rd          string
-	Instruction InstructionInformation
+	Instruction types.InstructionInformation
 }
 
 type DFormat struct {
@@ -37,25 +25,25 @@ type DFormat struct {
 	Opcode2     string
 	Rn          string
 	Rd          string
-	Instruction InstructionInformation
+	Instruction types.InstructionInformation
 }
 
 type BFormat struct {
 	Opcode        string
 	BranchAddress string
-	Instruction   InstructionInformation
+	Instruction   types.InstructionInformation
 }
 
 type CBFormat struct {
 	Opcode        string
 	BranchAddress string
 	Rt            string
-	Instruction   InstructionInformation
+	Instruction   types.InstructionInformation
 }
 
 type IWFormat struct {
 	Opcode       string
 	MovImmediate string
 	Rd           string
-	Instruction  InstructionInformation
+	Instruction  types.InstructionInformation
 }

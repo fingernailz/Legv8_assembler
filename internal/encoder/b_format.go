@@ -2,13 +2,13 @@ package encoder
 
 import (
 	"legv8_assembler/internal/errors"
-	"legv8_assembler/internal/types"
+	"legv8_assembler/internal/labels"
 	"strconv"
 	"strings"
 )
 
 // something is wrong idk FIX plz
-func (b *BFormat) BinaryConversion(label_locations types.Labels) error {
+func (b *BFormat) BinaryConversion() error {
 	// check for b if there then good
 
 	// instruction_slice = slices.Delete(instruction_slice, 0, 1)
@@ -20,7 +20,7 @@ func (b *BFormat) BinaryConversion(label_locations types.Labels) error {
 	}
 
 	label := strings.TrimSpace(after)
-	location, available := label_locations[label]
+	location, available := labels.LabelLocation[label]
 	if !available {
 		return errors.Invalid_label
 	}
@@ -45,4 +45,7 @@ func (instruction *BFormat) Assemble() {
 	instruction.Instruction.BinaryInstruction =
 		instruction.Opcode +
 			instruction.BranchAddress
+}
+func (instruction *BFormat) GetBinary() string {
+	return instruction.Instruction.BinaryInstruction
 }
